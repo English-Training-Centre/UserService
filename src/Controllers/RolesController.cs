@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserService.src.Constants;
 using UserService.src.DTOs;
@@ -5,6 +6,7 @@ using UserService.src.Interfaces;
 
 namespace UserService.src.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class RolesController(IRolesRepository rolesRepository) : ControllerBase, IRolesController

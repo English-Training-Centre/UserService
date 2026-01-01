@@ -21,7 +21,6 @@ namespace UserService.src.Repositories
 
         public async Task<ResponseDTO> CreateAsync(RolesCreateDTO roles)
         {
-
             try
             {
                 return await _db.ExecuteInTransactionAsync(async (conn, tx) =>

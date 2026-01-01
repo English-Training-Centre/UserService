@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserService.src.Constants;
 using UserService.src.DTOs;
@@ -5,6 +6,7 @@ using UserService.src.Interfaces;
 
 namespace UserService.src.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController(IUsersRepository usersRepository) : ControllerBase, IUsersController
@@ -58,6 +60,7 @@ namespace UserService.src.Controllers
         }
 
         // AuthService
+        [AllowAnonymous]
         [HttpPost("v1/auth")]
         public async Task<ActionResult<AuthResponseDTO>> AuthUserAsync([FromBody] AuthUsersDTO user)
         {

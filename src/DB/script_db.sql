@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS tbRoles
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(25) UNIQUE NOT NULL
 );
+-- ROLES
 
 -- USERS
 CREATE TABLE IF NOT EXISTS tbUsers
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS tbUsers
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NULL
 );
+-- USERS
 
 -- QUERIES
 DROP TABLE tbUsers;
@@ -56,3 +58,4 @@ SELECT
 FROM tbUsers u
 INNER JOIN tbRoles r ON r.id = u.role_id
 ORDER BY u.fullname ASC;
+-- QUERIES

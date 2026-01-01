@@ -62,11 +62,22 @@ namespace UserService.src.Controllers
         // AuthService
         [AllowAnonymous]
         [HttpPost("v1/auth")]
-        public async Task<ActionResult<AuthResponseDTO>> AuthUserAsync([FromBody] AuthUsersDTO user)
+        public async Task<ActionResult<AuthResponseDTO>> AuthUserAsync([FromBody] AuthRequestDTO auth)
         {
             if (!ModelState.IsValid) return BadRequest(ResponseDTO.Failure(MessagesConstant.InvalidData));
 
-            var result = await _usersRep.AuthUserAsync(user);
+            var result = await _usersRep.AuthUserAsync(auth);
+
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("v1/get-user/{id:guid}")]
+        public async Task<ActionResult<AuthResponseDTO>> GetUserByIdAsync([FromRoute] Guid id)
+        {
+            if (!ModelState.IsValid) return BadRequest(ResponseDTO.Failure(MessagesConstant.InvalidData));
+
+            var result = await _usersRep.GetUserByIdAsync(id);
 
             return Ok(result);
         }

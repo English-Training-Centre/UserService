@@ -11,6 +11,7 @@ namespace UserService.src.Interfaces
         Task<IActionResult> DeleteAsync([FromRoute] Guid id);
 
         // AuthService
-        Task<ActionResult<AuthResponseDTO>> AuthUserAsync([FromBody] AuthUsersDTO user);
+        Task<ActionResult<AuthResponseDTO>> AuthUserAsync([FromBody] AuthRequestDTO auth);
+        Task<ActionResult<AuthResponseDTO>> GetUserByIdAsync([FromRoute] Guid id);
     }
 }

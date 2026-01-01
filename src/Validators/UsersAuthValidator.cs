@@ -3,7 +3,7 @@ using UserService.src.DTOs;
 
 namespace UserService.src.Validators
 {
-    public class UsersAuthValidator : AbstractValidator<AuthUsersDTO>
+    public class UsersAuthValidator : AbstractValidator<AuthRequestDTO>
     {
         public UsersAuthValidator()
         {

@@ -217,32 +217,65 @@ namespace UserService.src.Repositories
             }
         }
 
-        public async Task<AuthResponseDTO> AuthUserAsync(AuthUsersDTO user)
+        public async Task<AuthResponseDTO> AuthUserAsync(AuthRequestDTO auth)
         {
+            const string sql = @"SELECT 
+                u.id AS UserId,
+                r.name AS Role,
+                u.password_hash AS Password
+                FROM tbUsers u
+                JOIN tbRoles r ON r.id = u.role_id
+            WHERE username = @Username
+            AND is_active = TRUE
+            LIMIT 1;";
+
             try
             {
-                return await _db.ExecuteInTransactionAsync(async (conn, tx) =>
-                {
-                    const string sqlGetUser = @"SELECT id AS UserId, role_id AS RoleId, password_hash AS Password FROM tbUsers WHERE username = @Username AND is_active = TRUE;";
-                    var getUser = await conn.QueryFirstOrDefaultAsync<AuthGetUserDTO>(sqlGetUser, new { user.Username }, tx);
-                    if (getUser is null || !BCrypt.Net.BCrypt.Verify(user.Password, getUser.Password)) { return AuthResponseDTO.Failure("Invalid credentials."); }
+                var getUser = await _db.QueryFirstOrDefaultAsync<AuthGetUserDTO>(sql, new { auth.Username });
+                if (getUser is null || !BCrypt.Net.BCrypt.Verify(auth.Password, getUser.Password)) { return AuthResponseDTO.Failure(); }
 
-                    const string sqlGetRoleName =  @"SELECT name FROM tbRoles WHERE id = @Id LIMIT 1;";
-                    var role = await conn.QueryFirstOrDefaultAsync<string>(sqlGetRoleName, new { Id = getUser.RoleId }, tx);
-                    if (string.IsNullOrWhiteSpace(role)) { return AuthResponseDTO.Failure(MessagesConstant.NotFound); }
-
-                    return AuthResponseDTO.Success("Signed in successfully.", getUser.UserId, user.Username, role);
-                });
+                return AuthResponseDTO.Success(getUser.UserId, auth.Username, getUser.Role);
             }
             catch (PostgresException pgEx)
             {      
                 _logger.LogError(pgEx, " - Unexpected PostgreSQL Error");                
-                return AuthResponseDTO.Failure(MessagesConstant.DatabaseErrorGeneric);
+                return AuthResponseDTO.Failure();
             }
             catch (Exception ex)
             {  
                 _logger.LogError(ex, " - Unexpected error during transaction operation.");                
-                return AuthResponseDTO.Failure(MessagesConstant.UnexpectedError);
+                return AuthResponseDTO.Failure();
+            }
+        }
+
+        public async Task<AuthResponseDTO> GetUserByIdAsync(Guid id)
+        {
+            const string sql = @"SELECT
+                u.id,
+                u.username,
+                r.name AS Role
+                FROM tbUsers u
+                JOIN tbRoles r ON r.id = u.role_id
+            WHERE u.id = @Id
+            AND u.is_active = TRUE
+            LIMIT 1;";
+            
+            try
+            {
+                var getUser = await _db.QueryFirstOrDefaultAsync<AuthUserDTO>(sql, new { Id = id });
+                if (getUser is null) { return AuthResponseDTO.Failure(); }
+
+                return AuthResponseDTO.Success(getUser.Id, getUser.Username, getUser.Role);
+            }
+            catch (PostgresException pgEx)
+            {      
+                _logger.LogError(pgEx, " - Unexpected PostgreSQL Error");                
+                return AuthResponseDTO.Failure();
+            }
+            catch (Exception ex)
+            {  
+                _logger.LogError(ex, " - Unexpected error during transaction operation.");                
+                return AuthResponseDTO.Failure();
             }
         }
 

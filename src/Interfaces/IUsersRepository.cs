@@ -10,6 +10,7 @@ namespace UserService.src.Interfaces
         Task<ResponseDTO> DeleteAsync(Guid id);
 
         // AuthService
-        Task<AuthResponseDTO> AuthUserAsync(AuthUsersDTO user);
+        Task<AuthResponseDTO> AuthUserAsync(AuthRequestDTO auth);
+        Task<AuthResponseDTO> GetUserByIdAsync(Guid id);
     }
 }

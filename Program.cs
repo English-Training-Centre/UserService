@@ -34,6 +34,7 @@ app.UseWebSockets();
 
 app.UseRouting();
 app.UseCors("CorsPolicy");
+app.UseHttpCacheHeaders();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -8,19 +8,20 @@ namespace UserService.src.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class UsersController(IUsersRepository usersRepository) : ControllerBase, IUsersController
     {
         private readonly IUsersRepository _usersRep = usersRepository;
 
-        [HttpGet("v1/get-all")]
+        [HttpGet("get-all")]
         public async Task<ActionResult<IEnumerable<UsersListDTO>>> GetAllAsync()
         {
             var result = await _usersRep.GetAllAsync();
             return Ok(result);
         }
 
-        [HttpPost("v1/create")]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateAsync([FromForm] UsersCreateDTO user)
         {
             if (!ModelState.IsValid) return BadRequest(ResponseDTO.Failure(MessagesConstant.InvalidData));
@@ -33,7 +34,7 @@ namespace UserService.src.Controllers
             return Ok(result);
         }
 
-        [HttpPatch("v1/update")]
+        [HttpPatch("update")]
         public async Task<IActionResult> UpdateAsync([FromForm] UsersUpdateDTO user)
         {
             if (!ModelState.IsValid) return BadRequest(ResponseDTO.Failure(MessagesConstant.InvalidData));
@@ -46,7 +47,7 @@ namespace UserService.src.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("v1/delete/{id:guid}")]
+        [HttpDelete("delete/{id:guid}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] Guid id)
         {
             if (!ModelState.IsValid) return BadRequest(ResponseDTO.Failure(MessagesConstant.InvalidData));
@@ -61,7 +62,7 @@ namespace UserService.src.Controllers
 
         // AuthService
         [AllowAnonymous]
-        [HttpPost("v1/auth")]
+        [HttpPost("auth")]
         public async Task<ActionResult<AuthResponseDTO>> AuthUserAsync([FromBody] AuthRequestDTO auth)
         {
             if (!ModelState.IsValid) return BadRequest(ResponseDTO.Failure(MessagesConstant.InvalidData));
@@ -72,7 +73,7 @@ namespace UserService.src.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("v1/get-user/{id:guid}")]
+        [HttpGet("get-user/{id:guid}")]
         public async Task<ActionResult<AuthResponseDTO>> GetUserByIdAsync([FromRoute] Guid id)
         {
             if (!ModelState.IsValid) return BadRequest(ResponseDTO.Failure(MessagesConstant.InvalidData));

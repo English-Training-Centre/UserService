@@ -8,19 +8,20 @@ namespace UserService.src.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class RolesController(IRolesRepository rolesRepository) : ControllerBase, IRolesController
     {
         private readonly IRolesRepository _rolesRep = rolesRepository;
 
-        [HttpGet("v1/get-all")]
+        [HttpGet("get-all")]
         public async Task<ActionResult<IEnumerable<RolesDTO>>> GetAllAsync()
         {
             var result = await _rolesRep.GetAllAsync();
             return Ok(result);
         }
 
-        [HttpPost("v1/create")]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateAsync([FromBody] RolesCreateDTO roles)
         {
             if (!ModelState.IsValid) return BadRequest(ResponseDTO.Failure(MessagesConstant.InvalidData));
@@ -33,7 +34,7 @@ namespace UserService.src.Controllers
             return Ok(result);
         }
 
-        [HttpPut("v1/update")]
+        [HttpPut("update")]
         public async Task<IActionResult> UpdateAsync([FromBody] RolesDTO roles)
         {
             if (!ModelState.IsValid) return BadRequest(ResponseDTO.Failure(MessagesConstant.InvalidData));
@@ -46,7 +47,7 @@ namespace UserService.src.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("v1/delete/{id:guid}")]
+        [HttpDelete("delete/{id:guid}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] Guid id)
         {
             if (!ModelState.IsValid) return BadRequest(ResponseDTO.Failure(MessagesConstant.InvalidData));

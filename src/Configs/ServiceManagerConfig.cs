@@ -1,5 +1,8 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Npgsql;
 using UserService.src.DB;
 using UserService.src.Interfaces;
@@ -15,15 +18,46 @@ namespace UserService.src.Configs
 
             try
             {
+                // Versioning API
+                service.AddApiVersioning(opt =>
+                {
+                    opt.ReportApiVersions = true;
+                    opt.AssumeDefaultVersionWhenUnspecified = true;
+                    opt.DefaultApiVersion = new ApiVersion(1, 0);
+
+                    opt.ApiVersionReader = ApiVersionReader.Combine(
+                        new UrlSegmentApiVersionReader(),
+                        new HeaderApiVersionReader("api-version")
+                    );
+                });
+                service.AddVersionedApiExplorer(opt =>
+                {
+                    opt.GroupNameFormat = "'v'VVV";
+                    opt.SubstituteApiVersionInUrl = true;
+                }); 
+
+                // Cache
+                service.AddHttpCacheHeaders((op) => {
+                        op.MaxAge = 60;
+                        op.CacheLocation = CacheLocation.Private;
+                    },
+                    (validationOpt) => {
+                        validationOpt.MustRevalidate = true;
+                    }
+                );                
+                // end
+                
                 service.AddOpenApi();
                 service.AddEndpointsApiExplorer();
                 service.AddSwaggerConfiguration();
                 service.AddJWTAuthentication(configuration, logger);
                 service.AddHttpContextAccessor();
-
-                // FluentValidation
                 service.AddValidatorsFromAssembly(typeof(Program).Assembly);
-                service.AddControllers().Services.AddFluentValidationAutoValidation();
+
+                // controllers config...
+                service.AddControllers()
+                .AddNewtonsoftJson()
+                .Services.AddFluentValidationAutoValidation();
                 // end
 
                 service.AddSingleton<NpgsqlDataSource>(sp =>
@@ -39,9 +73,11 @@ namespace UserService.src.Configs
                 service.AddHealthChecks()
                     .AddNpgSql(sp => sp.GetRequiredService<NpgsqlDataSource>());
 
+                // scoped
                 service.AddScoped<IPostgresDbData, PostgresDB>();
                 service.AddScoped<IRolesRepository, RolesRepository>();
                 service.AddScoped<IUsersRepository, UsersRepository>();
+                // end
 
                 string? audience = configuration["JWTSettings:validAudience"];
                 if (string.IsNullOrWhiteSpace(audience)) throw new InvalidOperationException("JWTSettings:validAudience is missing in configuration.");
